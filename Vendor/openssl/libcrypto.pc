@@ -1,0 +1,12 @@
+prefix=/Volumes/Store/Work/Projects/PassTool/Vendor/openssl
+exec_prefix=${prefix}
+libdir=${exec_prefix}
+includedir=${prefix}/include ${prefix}/./include 
+modulesdir=${libdir}/providers
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: 4.0.0-dev
+Libs: -L${libdir} -lcrypto
+Libs.private: 
+Cflags: -I${prefix}/include  -I${prefix}/./include 

@@ -13,7 +13,8 @@ let package = Package(
 		.executable(name: "PassTool", targets: ["PassTool"])
 	],
 	dependencies: [
-		.package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.0")
+		.package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.0"),
+		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
 	],
 	targets: [
 		// C bridge only (modulemap + shim.h)
@@ -46,7 +47,10 @@ let package = Package(
 
 		.executableTarget(
 			name: "PassTool",
-			dependencies: ["PassSigner"]
+			dependencies: [
+				"PassSigner",
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+			]
 		),
 
 		.testTarget(

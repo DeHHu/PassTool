@@ -7,23 +7,22 @@
 import Foundation
 import ZIPFoundation
 
-public func zipPassDirectory(passDir: URL, outPKPass: URL) throws {
+public func zipPassDirectory(imagesFolderURL: URL, tempFolderURL: URL, outPKPass: URL) throws {
 	if FileManager.default.fileExists(atPath: outPKPass.path) {
 		try FileManager.default.removeItem(at: outPKPass)
 	}
 	let archive = try Archive(url: outPKPass, accessMode: .create)
-	let files = try FileManager.default.contentsOfDirectory(at: passDir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+	let images = try FileManager.default.contentsOfDirectory(at: imagesFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+	let files = try FileManager.default.contentsOfDirectory(at: tempFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
 	var signatureURL: URL? = nil
 	var manifestURL: URL? = nil
 	var passUrl: URL? = nil
-	var images: [URL] = []
-	
 	for file in files {
 		switch file.deletingPathExtension().lastPathComponent {
 			case "manifest" : manifestURL = file
 			case "pass": passUrl = file
 			case "signature": signatureURL = file
-			default: images.append(file)
+			default: break
 		}
 	}
 	guard let signatureURL, let manifestURL, let passUrl, images.isEmpty == false else {

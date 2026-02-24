@@ -66,7 +66,7 @@ public func signPKPassManifestDER(
 	wwdrCertPEM: URL,
 	outSignatureURL: URL
 ) throws {
-
+	let outSignatureURL = outSignatureURL.appending(path: "signature")
 	_ = OPENSSL_init_crypto(0, nil)
 	ERR_clear_error()
 

@@ -1,5 +1,8 @@
 // swift-tools-version: 6.2
 import PackageDescription
+import Foundation
+
+let opensslPrefix = ProcessInfo.processInfo.environment["OPENSSL_PREFIX"] ?? ".vendor/openssl"
 
 let package = Package(
 	name: "PassTool",
@@ -10,26 +13,34 @@ let package = Package(
 		.executable(name: "PassTool", targets: ["PassTool"])
 	],
 	dependencies: [
-		   .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.0")
-	   ],
+		.package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.0")
+	],
 	targets: [
-		// Clang-модуль: module.modulemap + shim.h должны лежать в Sources/COpenSSL/include/
+		// C bridge only (modulemap + shim.h)
 		.target(
 			name: "COpenSSL",
 			publicHeadersPath: "include"
 		),
 
-		// Swift-логика: сюда кладём и -I, и -L/-l
 		.target(
 			name: "PassSigner",
-			dependencies: ["COpenSSL",.product(name: "ZIPFoundation", package: "ZIPFoundation")],
+			dependencies: [
+				"COpenSSL",
+				.product(name: "ZIPFoundation", package: "ZIPFoundation")
+			],
 			cSettings: [
-				// ВАЖНО: include root, где лежит папка openssl/
-				.unsafeFlags(["-I", ".vendor/openssl/include"])
+				// OpenSSL headers root (contains folder "openssl/")
+				.unsafeFlags(["-I", "\(opensslPrefix)/include"])
 			],
 			linkerSettings: [
-				.unsafeFlags(["-L", ".vendor/openssl/lib", "-lssl", "-lcrypto"]),
-				.unsafeFlags(["-ldl", "-lpthread"], .when(platforms: [.linux]))
+				// IMPORTANT: direct static libs (works better than -L/-l on Linux SwiftPM)
+				.unsafeFlags([
+					"\(opensslPrefix)/lib/libssl.a",
+					"\(opensslPrefix)/lib/libcrypto.a"
+				]),
+
+				// Linux system libs commonly required by static OpenSSL
+				.unsafeFlags(["-ldl", "-lpthread", "-lz", "-lm"], .when(platforms: [.linux]))
 			]
 		),
 

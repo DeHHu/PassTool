@@ -70,6 +70,9 @@ struct PassTool: ParsableCommand {
 				outSignatureURL: tempDir
 			)
 			try zipPassDirectory(imagesFolderURL: contentsDir, tempFolderURL: tempDir, outPKPass: pkPassUrl)
+			if FileManager.default.fileExists(atPath: tempDir.path) {
+				try FileManager.default.removeItem(at: tempDir)
+			}
 			print("Apple pass successfully signed and ready to be shared!")
 		} catch {
 			print(error)

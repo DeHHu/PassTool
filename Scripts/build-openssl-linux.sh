@@ -43,7 +43,9 @@ make -j"$(nproc)" build_libs
 
 # Install headers + static libs into $OUT
 make install_sw install_ssldirs
-
+mkdir -p "$OUT/lib"
+cp -v "$OPENSSL_SRC/libcrypto.a" "$OUT/lib/"
+cp -v "$OPENSSL_SRC/libssl.a" "$OUT/lib/"
 echo "Done."
 echo "Include: $OUT/include"
 echo "Libs:    $OUT/lib"

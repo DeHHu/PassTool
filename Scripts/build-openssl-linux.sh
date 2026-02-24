@@ -29,23 +29,27 @@ cd "$OPENSSL_SRC"
 make clean >/dev/null 2>&1 || true
 
 # Configure for Debian x86_64, static only, no CLI/apps
-# - no-apps: do not build openssl CLI (fixes FMT_istext link errors you saw)
-# - no-tests: speeds up
-# - no-shared/no-dso: static + no dynamic modules
-# -fPIC is useful if you'll link these into other binaries
 ./Configure linux-x86_64 \
   no-apps no-tests no-shared no-dso \
-  --prefix="$OUT" \
+  --prefix="$OUT" --libdir=lib \
   -fPIC
 
 # Build only libraries (prevents building apps/openssl)
 make -j"$(nproc)" build_libs
 
-# Install headers + static libs into $OUT
+# Install headers/configs (libs may not be copied by install_sw in some setups)
 make install_sw install_ssldirs
+
+# Force-copy static libs (reliable fallback)
 mkdir -p "$OUT/lib"
 cp -v "$OPENSSL_SRC/libcrypto.a" "$OUT/lib/"
 cp -v "$OPENSSL_SRC/libssl.a" "$OUT/lib/"
+
+# Sanity checks
+test -f "$OUT/include/openssl/bio.h"
+test -f "$OUT/lib/libcrypto.a"
+test -f "$OUT/lib/libssl.a"
+
 echo "Done."
 echo "Include: $OUT/include"
 echo "Libs:    $OUT/lib"
